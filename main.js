@@ -101,7 +101,7 @@ function selectedAnswers() {
     }
 
     person[question_id] = answer;
-    console.log(person);
+  //  console.log(person);
 
     if(check == 0) {
         return false;
@@ -122,6 +122,7 @@ function handler(e){
             render.main();
         } else {
             stopTime();
+            result();
             h1.innerHTML = "Тест пройден";
             div.appendChild(h1);
         }
@@ -131,7 +132,7 @@ function handler(e){
 
 function timer() {
     var start = Date.now(),
-        timer = 6e5; // 10 минут
+        timer = 1e5; // 10 минут
         r = document.getElementById('r'),
         stop;
     (function f() {
@@ -141,7 +142,6 @@ function timer() {
             s = ts-m*60;
         r.innerHTML = 'Время отводимое на тест ' + (m >= 10 ? '' : '0') + m + ':' + (s >= 10 ? '' : '0') + s;
         if(diff >= timer) {
-            stopTime();
             timeEnd();
         }
         stop = setTimeout(f,1e3);
@@ -153,8 +153,32 @@ function stopTime() {
 }
 
 function timeEnd() {
+    stopTime();
     var div = document.getElementById('testArea');
     div.innerHTML = "<h2>Тест не сдан</h2><p>Подготовтесь получше и попробуйте в следующий раз.</p>";
+}
+
+function result() {
+    console.log(person);
+    var xhrr = new XMLHttpRequest();
+    xhrr.open('POST', 'core.php', true);
+    //xhrr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+    xhrr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded; charset=utf-8');
+    xhrr.send(JSON.stringify(person));
+
+    xhrr.onreadystatechange = function() {
+        if (this.readyState != 4) return;
+
+        if (this.status != 200) {
+            // обработать ошибку
+            alert('Ошибка ' + this.status + ': ' + this.statusText);
+            return;
+        } else {
+            // выводим результат
+            var test = this.responseText;
+           document.getElementById("testArea").innerHTML= test;
+        }
+    }
 }
 
 startTest.addEventListener("click", loadTest);
